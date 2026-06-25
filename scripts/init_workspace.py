@@ -37,6 +37,7 @@ SUBDIRS = [
     "learning-records",
     "exercises",
     "_templates",
+    "_templates/lesson-types",
 ]
 
 # (输出文件名, 模板文件名)
@@ -60,6 +61,14 @@ WORKSPACE_TEMPLATE_FILES = [
     "lesson.md.template",
     "handoff.md.template",
     "learning-record.md.template",
+    "review-quiz.md.template",
+    "lesson-types/concept-primer.md.template",
+    "lesson-types/code-trace.md.template",
+    "lesson-types/architecture-walkthrough.md.template",
+    "lesson-types/paper-reading.md.template",
+    "lesson-types/exercise-review.md.template",
+    "lesson-types/implementation-lab.md.template",
+    "lesson-types/phase-review.md.template",
 ]
 
 
@@ -114,6 +123,7 @@ def copy_workspace_templates(templates_dir: Path, root: Path, created: list, ski
         if target_path.exists():
             skipped.append(str(target_path))
             continue
+        target_path.parent.mkdir(parents=True, exist_ok=True)
         target_path.write_text(source_path.read_text(encoding="utf-8"), encoding="utf-8")
         created.append(str(target_path))
 
