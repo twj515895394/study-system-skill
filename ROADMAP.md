@@ -35,18 +35,16 @@
 - 新增 Quickstart 文档。
 - 新增 ROADMAP / CHANGELOG。
 
-## 下一步建议
-
 ### P4 - 脚本化课程操作
 
-目标：减少 Agent 手写多个 Markdown 文件导致的不一致。
+- 新增 `scripts/study_utils.py`，复用状态、模板、slug、Markdown section/table 更新等逻辑。
+- 新增 `scripts/new_lesson.py`：基于课型模板创建新课程，并同步 `STATE.json` / `CURRENT.md`。
+- 新增 `scripts/add_handoff.py`：生成规范 handoff，并同步 latest handoff。
+- 新增 `scripts/add_learning_record.py`：写入学习记录，并可追加 `REVIEW-SCHEDULE.md`。
+- 新增 `scripts/close_lesson.py`：课程收尾时同步 `STATE.json`、`CURRENT.md`、`PROGRESS.md`、`COURSE-LIST.md`。
+- 新增 `docs/script-commands.md`，说明完整命令用法。
 
-计划脚本：
-
-- `scripts/new_lesson.py`：基于课型模板创建新课程。
-- `scripts/close_lesson.py`：课程收尾时同步 `STATE.json`、`CURRENT.md`、`PROGRESS.md`。
-- `scripts/add_handoff.py`：生成规范 handoff 文件名和骨架。
-- `scripts/add_learning_record.py`：写入学习记录并同步复习计划。
+## 下一步建议
 
 ### P5 - 测试与 CI
 
@@ -56,7 +54,8 @@
 
 - 增加 `tests/test_init_workspace.py`。
 - 增加 `tests/test_validate_workspace.py`。
-- 增加 GitHub Actions，至少跑初始化和校验脚本。
+- 增加 `tests/test_script_commands.py`。
+- 增加 GitHub Actions，至少跑初始化、课程创建、课程收尾和校验脚本。
 
 ### P6 - 更多真实示例
 
