@@ -16,6 +16,7 @@ domain 接受任意字符串。code/course/industry/exam/child 是5个常见预�
 """
 import argparse
 import datetime
+import json
 import os
 from pathlib import Path
 
@@ -35,6 +36,7 @@ SUBDIRS = [
     "reference",
     "learning-records",
     "exercises",
+    "_templates",
 ]
 
 # (输出文件名, 模板文件名)
@@ -49,6 +51,15 @@ FILE_MAP = [
     ("TEACHING-PROTOCOL.md", "TEACHING-PROTOCOL.md.template"),
     ("GLOSSARY.md", "GLOSSARY.md.template"),
     ("NOTES.md", "NOTES.md.template"),
+    ("QUESTION-PARKING-LOT.md", "QUESTION-PARKING-LOT.md.template"),
+    ("REVIEW-SCHEDULE.md", "REVIEW-SCHEDULE.md.template"),
+]
+
+# 复制到 study/_templates/ 的模板。这里保留模板占位符,供后续课程/交接/学习记录创建时使用。
+WORKSPACE_TEMPLATE_FILES = [
+    "lesson.md.template",
+    "handoff.md.template",
+    "learning-record.md.template",
 ]
 
 
@@ -68,6 +79,43 @@ def get_skill_dir() -> Path:
     if env_skill_dir:
         return Path(env_skill_dir).expanduser().resolve()
     return Path(__file__).resolve().parent.parent
+
+
+def write_initial_state(root: Path, args, reading_map_filename: str, today: str, created: list, skipped: list) -> None:
+    state_path = root / "STATE.json"
+    if state_path.exists():
+        skipped.append(str(state_path))
+        return
+
+    state = {
+        "schema_version": 1,
+        "topic": args.topic,
+        "domain": args.domain,
+        "reading_map": reading_map_filename,
+        "diagnosis_mode": args.diagnosis_mode,
+        "current_lesson_id": None,
+        "current_lesson_title": None,
+        "current_phase": None,
+        "current_status": "未开始",
+        "latest_handoff": None,
+        "blocked_by": [],
+        "makeup_count_in_current_phase": 0,
+        "last_updated": today,
+    }
+    state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    created.append(str(state_path))
+
+
+def copy_workspace_templates(templates_dir: Path, root: Path, created: list, skipped: list) -> None:
+    target_dir = root / "_templates"
+    for template_name in WORKSPACE_TEMPLATE_FILES:
+        source_path = templates_dir / template_name
+        target_path = target_dir / template_name
+        if target_path.exists():
+            skipped.append(str(target_path))
+            continue
+        target_path.write_text(source_path.read_text(encoding="utf-8"), encoding="utf-8")
+        created.append(str(target_path))
 
 
 def main():
@@ -113,10 +161,11 @@ def main():
     )
     reading_map_filename = args.reading_map_name or preset_filename
     reading_map_title = args.reading_map_title or preset_title
+    today = datetime.date.today().isoformat()
 
     mapping = {
         "TOPIC": args.topic,
-        "DATE": datetime.date.today().isoformat(),
+        "DATE": today,
         "READING_MAP_NAME": reading_map_filename,
         "READING_MAP_NAME_TITLE": reading_map_title,
         "DIAGNOSIS_MODE": args.diagnosis_mode,
@@ -128,6 +177,8 @@ def main():
 
     created = []
     skipped = []
+
+    write_initial_state(root, args, reading_map_filename, today, created, skipped)
 
     for out_name, template_name in FILE_MAP:
         out_path = root / out_name
@@ -147,6 +198,8 @@ def main():
         reading_map_path.write_text(render(template_text, mapping), encoding="utf-8")
         created.append(str(reading_map_path))
 
+    copy_workspace_templates(templates_dir, root, created, skipped)
+
     print(f"学习工作区已初始化: {root.resolve()}")
     print(f"使用的 Skill 目录: {skill_dir}")
     print(f"\n创建了 {len(created)} 个文件:")
@@ -160,7 +213,7 @@ def main():
     print(
         "\n下一步: 结合诊断结果填写 MISSION.md 和 MASTER-PLAN.md, "
         "再展开 COURSE-ROADMAP.md / COURSE-LIST.md / "
-        f"{reading_map_filename}"
+        f"{reading_map_filename}, 并运行 validate_workspace.py 做一致性检查。"
     )
 
 
