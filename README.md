@@ -22,7 +22,9 @@
 2. **主线固定，动态补课**：学习主线保持清晰，允许因基础薄弱随时插入“补课”或“概念复习”，但补课必须有明确的目的和边界，且结束后必须回到主线。
 3. **按掌握程度推进，不按时间推进**：摒弃机械的“X天计划”，只有在用户通过“理解检查”后，才能进入下一课。
 4. **“讲过”不等于“学会了”**：严格区分 **Exposure (接触过)** 和 **Understanding (理解了)**。只有用户能用自己的话解释或通过场景题测试，才能将知识记录在学习档案中。
-5. **状态一致**：`CURRENT.md`、`PROGRESS.md`、`COURSE-LIST.md` 和最新 handoff 必须使用同一套状态模型，避免长期学习过程中状态漂移。
+5. **状态一致**：`STATE.json`、`CURRENT.md`、`PROGRESS.md`、`COURSE-LIST.md` 和最新 handoff 必须使用同一套状态模型，避免长期学习过程中状态漂移。
+6. **问题不等于补课**：不阻塞主线的问题进入 `QUESTION-PARKING-LOT.md`，避免每个旁支问题都打断课程。
+7. **通过不等于长期掌握**：通过理解检查后，还要进入 `REVIEW-SCHEDULE.md` 做后续复习与迁移验证。
 
 ---
 
@@ -35,19 +37,22 @@ study-system/
 ├── SKILL.md                    # 核心 Skill 定义文件，包含 Agent 的触发规则、原则及工作流指令
 ├── README.md                   # 本说明文件
 ├── scripts/
-│   └── init_workspace.py       # 用于在用户项目中初始化 study/ 学习工作区的 Python 脚本
+│   ├── init_workspace.py       # 初始化 study/ 学习工作区
+│   └── validate_workspace.py   # 校验 study/ 工作区状态一致性
 ├── references/                 # 指导 Agent 执行伴学动作的参考规范
 │   ├── diagnostic-questions.md # 5个核心领域的轻量诊断问题模板
 │   ├── lesson-flow.md          # 单课教学流程设计及“理解检查”方法论
 │   ├── dynamic-makeup-rules.md # 动态补课的触发判定与规则表
 │   ├── handoff-protocol.md     # 跨会话续接时的文件读取与交接规范
-│   └── status-model.md         # CURRENT/PROGRESS/COURSE-LIST/handoff 的统一状态模型
+│   └── status-model.md         # STATE/CURRENT/PROGRESS/COURSE-LIST/handoff 的统一状态模型
 └── templates/                  # 工作区各类文档的模板文件（供初始化脚本调用）
-    ├── MASTER-PLAN.md.template # 唯一权威主计划模板
-    ├── MISSION.md.template     # 学习使命与边界模板
-    ├── CURRENT.md.template     # 当前学习状态模板（新会话优先读取）
-    ├── PROGRESS.md.template    # 整体进度看板模板
-    └── ...                     # 其他阶段路线图、术语表、交接单等模板
+    ├── MASTER-PLAN.md.template
+    ├── MISSION.md.template
+    ├── CURRENT.md.template
+    ├── PROGRESS.md.template
+    ├── QUESTION-PARKING-LOT.md.template
+    ├── REVIEW-SCHEDULE.md.template
+    └── ...
 ```
 
 ---
@@ -105,6 +110,14 @@ python "${CLAUDE_SKILL_DIR}/scripts/init_workspace.py" \
 python scripts/init_workspace.py --root ./study --topic "RAG 系统原理" --domain code
 ```
 
+初始化会生成：
+
+- `STATE.json`：机器可读状态摘要。
+- `MISSION.md` / `MASTER-PLAN.md` / `CURRENT.md` / `PROGRESS.md` 等核心看板。
+- `QUESTION-PARKING-LOT.md`：问题停车场，用于控制发散。
+- `REVIEW-SCHEDULE.md`：复习计划，用于跟踪长期掌握。
+- `study/_templates/`：工作区内置课程、handoff、learning-record 模板。
+
 ### 参数说明
 
 - `--root`: 工作区根目录，默认 `./study`。
@@ -122,7 +135,7 @@ python scripts/init_workspace.py --root ./study --topic "RAG 系统原理" --dom
 
 ---
 
-## 🔄 标准工作流 (The 7-Step Workflow)
+## 🔄 标准工作流 (The 8-Step Workflow)
 
 ```mermaid
 graph TD
@@ -130,28 +143,33 @@ graph TD
     B --> C[Step 3: 运行脚本初始化 study/ 骨架]
     C --> D[Step 4: 填充 MISSION.md 与 MASTER-PLAN.md]
     D --> E[Step 5: 单课循环 - 讲解与理解检查]
+    E -->|旁支问题| Q[写入 QUESTION-PARKING-LOT.md]
+    Q --> E
     E -->|未通过| F[动态判定: 插入补课并回溯]
     F --> E
-    E -->|通过| G[Step 6: 更新进度与 CURRENT.md, 写入 handoffs/]
-    G --> H[Step 7: 跨会话续接 - 优先读取 CURRENT & handoff]
-    H --> E
+    E -->|通过| G[Step 6: 更新 STATE/CURRENT/PROGRESS 与 handoff]
+    G --> R[写入 learning-records 与 REVIEW-SCHEDULE]
+    R --> H[Step 7: 跨会话续接 - 优先读取 STATE/CURRENT/handoff]
+    H --> V[Step 8: validate_workspace.py 状态校验]
+    V --> E
 ```
 
 ### 详细步骤说明
 
 1. **确认资料与目标 (Step 1)**：AI 明确用户的资料来源（代码、教材、论文等）以及期望达到的终点状态。
 2. **轻量诊断 (Step 2)**：AI 从 `references/diagnostic-questions.md` 选取 3-5 个针对性问题，摸清用户基础，制定合适坡度。
-3. **搭建工作区 (Step 3)**：AI 调用脚本，在项目目录下生成 `study/` 目录及核心看板和计划文件。
+3. **搭建工作区 (Step 3)**：AI 调用脚本，在项目目录下生成 `study/` 目录、状态文件、核心看板、问题停车场、复习计划和工作区模板。
 4. **填充主计划 (Step 4)**：AI 细化填充 `MASTER-PLAN.md`（课程清单与阶段验收标准）和 `MISSION.md`（定义阶段成功图景）。
-5. **单课循环 (Step 5)**：采用“一课一主题”设计，课后进行严格的**理解检查 (Comprehension Check)**，杜绝“懂了吗”这种流于表面的提问。
-6. **收尾与记录 (Step 6)**：只有通过检查，才能更新 `PROGRESS.md`、`CURRENT.md`、`learning-records/`、`GLOSSARY.md`，并在 `handoffs/` 下写交接单。
-7. **跨会话续接 (Step 7)**：新对话开始时，AI 优先读取 `CURRENT.md` 和最新 `handoff` 快速热启动，直接对齐上节课的内容。
+5. **单课循环 (Step 5)**：采用“一课一主题”设计，课后进行严格的**理解检查 (Comprehension Check)**，杜绝“懂了吗”这种流于表面的提问；不阻塞主线的问题进入 `QUESTION-PARKING-LOT.md`。
+6. **收尾与记录 (Step 6)**：只有通过检查，才能更新 `STATE.json`、`PROGRESS.md`、`CURRENT.md`、`learning-records/`、`GLOSSARY.md`、`REVIEW-SCHEDULE.md`，并在 `handoffs/` 下写交接单。
+7. **跨会话续接 (Step 7)**：新对话开始时，AI 优先读取 `STATE.json`、`CURRENT.md` 和最新 `handoff` 快速热启动，直接对齐上节课的内容。
+8. **状态校验 (Step 8)**：阶段收尾、新会话接手、或发现状态冲突时运行 `validate_workspace.py`，先修复一致性问题，再继续授课。
 
 ---
 
 ## 🧭 统一状态模型
 
-`CURRENT.md`、`PROGRESS.md`、`COURSE-LIST.md` 和最新 handoff 统一使用以下状态：
+`STATE.json`、`CURRENT.md`、`PROGRESS.md`、`COURSE-LIST.md` 和最新 handoff 统一使用以下状态：
 
 ```text
 未开始 / 进行中 / 待理解检查 / 待补课 / 补课中 / 已完成 / 需复习 / 暂停
@@ -167,13 +185,30 @@ graph TD
 
 ---
 
+## ✅ 工作区校验
+
+```bash
+python "${CLAUDE_SKILL_DIR}/scripts/validate_workspace.py" --root ./study
+```
+
+`validate_workspace.py` 只读不写，主要检查：
+
+- 必需文件和目录是否存在。
+- `STATE.json` 是否合法，`latest_handoff` 是否存在。
+- 状态是否使用统一枚举。
+- `PROGRESS.md` 与 `COURSE-LIST.md` 的同一课次状态是否一致。
+- 未完成课程是否误填了 `learning-record`。
+- handoff 文件名是否符合 `YYYY-MM-DD-Lxx-slug.md` 规范。
+
+---
+
 ## 📈 贡献与定制
 
 该系统模板可以根据你特定的教学理念或项目性质进行扩展：
 
 - **扩充诊断问题**：修改 `references/diagnostic-questions.md` 添加全新的专业细分领域。
 - **增加课程模板**：在 `templates/` 下定义更适合特定语言（如 Go/Rust）或特定类型考试的专有课表模板。
-- **扩展状态校验**：后续可基于 `references/status-model.md` 增加 `validate_workspace.py`，对 `CURRENT.md` / `PROGRESS.md` / handoff 的一致性做程序化检查。
+- **扩展状态校验**：基于 `scripts/validate_workspace.py` 增加更严格的 `STATE.json` / Markdown 一致性检查。
 
 ---
 
