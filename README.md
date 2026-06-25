@@ -16,6 +16,15 @@
 
 ---
 
+## ⚡ 快速入口
+
+- 快速上手：[`docs/quickstart.md`](docs/quickstart.md)
+- 完整示例：[`examples/codebase-study-demo/`](examples/codebase-study-demo/)
+- 路线图：[`ROADMAP.md`](ROADMAP.md)
+- 变更记录：[`CHANGELOG.md`](CHANGELOG.md)
+
+---
+
 ## 🧠 核心设计原则
 
 1. **先建体系，再上课程**：不盲目开讲。在正式开始学习前，必须先理清学习目标（Mission）、主计划（Master Plan）和起点，搭建结构化的骨架。
@@ -35,6 +44,10 @@
 study-system/
 ├── SKILL.md
 ├── README.md
+├── docs/
+│   └── quickstart.md
+├── examples/
+│   └── codebase-study-demo/
 ├── scripts/
 │   ├── init_workspace.py
 │   └── validate_workspace.py
@@ -232,6 +245,19 @@ python "${CLAUDE_SKILL_DIR}/scripts/validate_workspace.py" --root ./study
 - 未完成课程是否误填了 `learning-record`。
 - handoff 文件名是否符合 `YYYY-MM-DD-Lxx-slug.md` 规范。
 - 工作区内置模板是否齐全。
+
+---
+
+## 📚 示例与教程
+
+- `docs/quickstart.md`：从安装到初始化、上第一课、校验工作区的完整流程。
+- `examples/codebase-study-demo/`：源码项目学习示例，展示一套已经推进到 L01 完成状态的 `study/` 工作区。
+
+---
+
+## 🗺️ 后续计划
+
+见 [`ROADMAP.md`](ROADMAP.md)。
 
 ---
 
