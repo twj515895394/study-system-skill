@@ -19,6 +19,7 @@
 ## ⚡ 快速入口
 
 - 快速上手：[`docs/quickstart.md`](docs/quickstart.md)
+- 脚本命令：[`docs/script-commands.md`](docs/script-commands.md)
 - 完整示例：[`examples/codebase-study-demo/`](examples/codebase-study-demo/)
 - 路线图：[`ROADMAP.md`](ROADMAP.md)
 - 变更记录：[`CHANGELOG.md`](CHANGELOG.md)
@@ -35,6 +36,7 @@
 6. **问题不等于补课**：不阻塞主线的问题进入 `QUESTION-PARKING-LOT.md`，避免每个旁支问题都打断课程。
 7. **通过不等于长期掌握**：通过理解检查后，还要进入 `REVIEW-SCHEDULE.md` 做后续复习与迁移验证。
 8. **先选课型，再写课程**：概念课、源码课、架构课、论文课、练习课、实现课和阶段复盘课使用不同模板。
+9. **能脚本化就脚本化**：创建课程、生成 handoff、写 learning-record、课程收尾优先使用脚本，减少多文件手动同步导致的状态漂移。
 
 ---
 
@@ -45,12 +47,18 @@ study-system/
 ├── SKILL.md
 ├── README.md
 ├── docs/
-│   └── quickstart.md
+│   ├── quickstart.md
+│   └── script-commands.md
 ├── examples/
 │   └── codebase-study-demo/
 ├── scripts/
 │   ├── init_workspace.py
-│   └── validate_workspace.py
+│   ├── new_lesson.py
+│   ├── add_handoff.py
+│   ├── add_learning_record.py
+│   ├── close_lesson.py
+│   ├── validate_workspace.py
+│   └── study_utils.py
 ├── references/
 │   ├── diagnostic-questions.md
 │   ├── lesson-flow.md
@@ -133,20 +141,29 @@ python scripts/init_workspace.py --root ./study --topic "RAG 系统原理" --dom
 - `REVIEW-SCHEDULE.md`：复习计划，用于跟踪长期掌握。
 - `study/_templates/`：工作区内置课程、handoff、learning-record、review quiz 和多课型模板。
 
-### 参数说明
+---
 
-- `--root`: 工作区根目录，默认 `./study`。
-- `--topic`: 学习主题名称。
-- `--domain`: 学习领域，决定生成的资料地图文件名。
-  - `code` -> `SOURCE-READING-MAP.md` (源码阅读地图)
-  - `course` -> `TEXTBOOK-READING-MAP.md` (教材阅读地图)
-  - `industry` -> `RESOURCE-READING-MAP.md` (资料阅读地图)
-  - `exam` -> `EXAM-ROADMAP.md` (考试路线图)
-  - `child` -> `SCHOOL-SYNC-PLAN.md` (学校同步进度图)
-  - 亦可传入其他自定义字符串，如 `research`。
-- `--reading-map-name`: 自定义资料地图文件名（覆盖 domain 默认）。
-- `--reading-map-title`: 自定义资料地图标题。
-- `--diagnosis-mode`: 诊断模式说明。
+## 🧰 课程操作脚本
+
+详见 [`docs/script-commands.md`](docs/script-commands.md)。
+
+| 脚本 | 用途 |
+|---|---|
+| `scripts/new_lesson.py` | 基于课型模板创建新课，并同步 `STATE.json` / `CURRENT.md` |
+| `scripts/add_handoff.py` | 生成规范 handoff，并同步 latest handoff |
+| `scripts/add_learning_record.py` | 创建 learning-record，并可追加 `REVIEW-SCHEDULE.md` |
+| `scripts/close_lesson.py` | 课程收尾，同步 `STATE.json`、`CURRENT.md`、`PROGRESS.md`、`COURSE-LIST.md` |
+| `scripts/validate_workspace.py` | 校验工作区一致性，只读不写 |
+
+推荐操作流：
+
+```bash
+python "${CLAUDE_SKILL_DIR}/scripts/new_lesson.py" --root ./study --lesson-id L02 --title "CLI 入口到任务调度的调用链" --lesson-type code-trace
+python "${CLAUDE_SKILL_DIR}/scripts/add_handoff.py" --root ./study --lesson-id L02 --title "CLI 入口到任务调度的调用链" --status 已完成
+python "${CLAUDE_SKILL_DIR}/scripts/add_learning_record.py" --root ./study --topic "CLI 到 Scheduler 调用链" --lesson-id L02 --mastery Understanding --evidence "用户能复述入口、任务创建和调度提交过程"
+python "${CLAUDE_SKILL_DIR}/scripts/close_lesson.py" --root ./study --lesson-id L02 --title "CLI 入口到任务调度的调用链" --status 已完成
+python "${CLAUDE_SKILL_DIR}/scripts/validate_workspace.py" --root ./study
+```
 
 ---
 
@@ -162,7 +179,7 @@ graph TD
     Q --> E
     E -->|未通过| F[动态判定: 插入补课并回溯]
     F --> E
-    E -->|通过| G[Step 6: 更新 STATE/CURRENT/PROGRESS 与 handoff]
+    E -->|通过| G[Step 6: 脚本化收尾与状态同步]
     G --> R[写入 learning-records 与 REVIEW-SCHEDULE]
     R --> H[Step 7: 跨会话续接 - 优先读取 STATE/CURRENT/handoff]
     H --> V[Step 8: validate_workspace.py 状态校验]
@@ -176,7 +193,7 @@ graph TD
 3. **搭建工作区 (Step 3)**：AI 调用脚本，在项目目录下生成 `study/` 目录、状态文件、核心看板、问题停车场、复习计划和工作区模板。
 4. **填充主计划 (Step 4)**：AI 细化填充 `MASTER-PLAN.md`（课程清单与阶段验收标准）和 `MISSION.md`（定义阶段成功图景）。
 5. **单课循环 (Step 5)**：先选择课型模板，再进行“一课一主题”的教学和理解检查。
-6. **收尾与记录 (Step 6)**：只有通过检查，才能更新 `STATE.json`、`PROGRESS.md`、`CURRENT.md`、`learning-records/`、`GLOSSARY.md`、`REVIEW-SCHEDULE.md`，并在 `handoffs/` 下写交接单。
+6. **收尾与记录 (Step 6)**：优先使用 `add_handoff.py`、`add_learning_record.py`、`close_lesson.py` 同步状态和产物。
 7. **跨会话续接 (Step 7)**：新对话开始时，AI 优先读取 `STATE.json`、`CURRENT.md` 和最新 `handoff` 快速热启动。
 8. **状态校验 (Step 8)**：阶段收尾、新会话接手、或发现状态冲突时运行 `validate_workspace.py`。
 
@@ -236,21 +253,14 @@ graph TD
 python "${CLAUDE_SKILL_DIR}/scripts/validate_workspace.py" --root ./study
 ```
 
-`validate_workspace.py` 只读不写，主要检查：
-
-- 必需文件和目录是否存在。
-- `STATE.json` 是否合法，`latest_handoff` 是否存在。
-- 状态是否使用统一枚举。
-- `PROGRESS.md` 与 `COURSE-LIST.md` 的同一课次状态是否一致。
-- 未完成课程是否误填了 `learning-record`。
-- handoff 文件名是否符合 `YYYY-MM-DD-Lxx-slug.md` 规范。
-- 工作区内置模板是否齐全。
+`validate_workspace.py` 只读不写，主要检查：必需文件和目录、`STATE.json`、状态枚举、`PROGRESS.md` / `COURSE-LIST.md` 一致性、handoff 命名和工作区模板完整性。
 
 ---
 
 ## 📚 示例与教程
 
 - `docs/quickstart.md`：从安装到初始化、上第一课、校验工作区的完整流程。
+- `docs/script-commands.md`：课程操作脚本的完整命令参考。
 - `examples/codebase-study-demo/`：源码项目学习示例，展示一套已经推进到 L01 完成状态的 `study/` 工作区。
 
 ---
