@@ -1,0 +1,40 @@
+# {{TOPIC}} 学习工作区
+
+这是一个持续推进的学习工作区，用于系统学习「{{TOPIC}}」。
+
+## 新会话从这里开始
+
+按顺序读：
+
+1. `MASTER-PLAN.md` —— 唯一权威主计划
+2. `MISSION.md` —— 为什么学这个
+3. `CURRENT.md` —— 当前学习状态（最重要，直接告诉你接下来该做什么）
+4. `PROGRESS.md` —— 整体进度看板
+5. `handoffs/` 里最新一份 —— 上节课具体发生了什么
+
+## 目录结构
+
+```
+study/
+├── README.md              本文件
+├── MASTER-PLAN.md          唯一权威主计划
+├── MISSION.md              为什么学
+├── CURRENT.md              当前状态，新会话优先读
+├── PROGRESS.md             进度看板
+├── COURSE-ROADMAP.md       阶段路线图
+├── COURSE-LIST.md          课程清单
+├── {{READING_MAP_NAME}}    资料阅读地图
+├── GLOSSARY.md             术语表（仅理解后写入）
+├── NOTES.md                用户偏好与临时笔记
+├── handoffs/               每节课交接文档
+├── lessons/                单课详细内容
+├── reference/              复习资料（课程精华压缩版）
+├── learning-records/       学习记录（仅理解检查通过后写入）
+└── exercises/              练习产出
+```
+
+## 每节课结束要更新什么
+
+`PROGRESS.md`、`CURRENT.md`、写一份新 handoff、更新对应 `reference/`。只有理解检查通过才更新 `learning-records/` 和 `GLOSSARY.md`。
+
+创建时间：{{DATE}}
