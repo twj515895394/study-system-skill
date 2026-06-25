@@ -1,0 +1,64 @@
+# 阶段复盘课：{{LESSON_TITLE}}
+
+阶段：{{PHASE_NAME}}
+日期：{{DATE}}
+
+## 阶段目标回看
+
+（复制/引用 MASTER-PLAN.md 中本阶段目标和验收标准）
+
+## 已完成课程
+
+| 课次 | 主题 | 状态 | learning-record | 是否需复习 |
+|---|---|---|---|---|
+| | | | | |
+
+## 已掌握能力
+
+| 能力点 | 证据 | 掌握等级 | 是否稳固 |
+|---|---|---|---|
+| | | Understanding / Skill / Capability | 是 / 否 |
+
+## 未解决问题
+
+（回看 QUESTION-PARKING-LOT.md）
+
+| 问题 | 是否阻塞下一阶段 | 处理决定 |
+|---|---|---|
+| | 是 / 否 | 解决 / 延后 / 丢弃 / 转补课 |
+
+## 复习计划回看
+
+（回看 REVIEW-SCHEDULE.md）
+
+| 知识点 | 当前掌握状态 | 是否需要复习/补课 |
+|---|---|---|
+| | | |
+
+## 阶段验收任务
+
+（设计一个综合任务，覆盖本阶段核心能力）
+
+## 阶段验收评分
+
+- 验收方式：综合设计 / 项目实现 / 源码复述 / 试题模拟 / 方案输出
+- 掌握等级：Exposure / Understanding / Skill / Capability
+- 是否通过阶段验收：是 / 否
+- 通过证据：
+- 不足之处：
+
+## 下一阶段建议
+
+- 可以进入下一阶段：是 / 否
+- 进入前必须补齐：
+- 下一阶段第一课建议：
+
+## 文档更新
+
+- `STATE.json`：
+- `CURRENT.md`：
+- `PROGRESS.md`：
+- `COURSE-LIST.md`：
+- `QUESTION-PARKING-LOT.md`：
+- `REVIEW-SCHEDULE.md`：
+- `handoffs/`：
