@@ -15,6 +15,7 @@ import json
 import re
 import sys
 from pathlib import Path
+from typing import Dict, List, Optional
 
 VALID_STATUSES = {
     "未开始",
@@ -65,8 +66,8 @@ HANDOFF_NAME_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}-L\d{2,}-.+\.md$")
 
 class Report:
     def __init__(self) -> None:
-        self.errors = []
-        self.warnings = []
+        self.errors: List[str] = []
+        self.warnings: List[str] = []
 
     def error(self, message: str) -> None:
         self.errors.append(message)
@@ -91,7 +92,7 @@ def read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
-def load_state(root: Path, report: Report) -> dict:
+def load_state(root: Path, report: Report) -> Dict:
     state_path = root / "STATE.json"
     if not state_path.exists():
         report.error("missing STATE.json")
@@ -130,7 +131,7 @@ def check_required_paths(root: Path, report: Report) -> None:
             report.warn(f"missing workspace template: _templates/{template_name}")
 
 
-def first_content_line_after_heading(text: str, heading: str) -> str | None:
+def first_content_line_after_heading(text: str, heading: str) -> Optional[str]:
     lines = text.splitlines()
     for idx, line in enumerate(lines):
         if line.strip() == heading:
@@ -144,7 +145,7 @@ def first_content_line_after_heading(text: str, heading: str) -> str | None:
     return None
 
 
-def extract_current_status(root: Path, report: Report) -> str | None:
+def extract_current_status(root: Path, report: Report) -> Optional[str]:
     path = root / "CURRENT.md"
     if not path.exists():
         return None
@@ -154,12 +155,16 @@ def extract_current_status(root: Path, report: Report) -> str | None:
         report.warn("CURRENT.md has no status under '## 当前状态'")
         return None
 
-    # 模板中的说明行通常是括号包裹,不视为真实状态。
+    # 初始化模板里的说明行包含多个状态,不能当作真实状态。
+    if "使用统一状态" in line or "/" in line:
+        report.warn("CURRENT.md still contains the status instruction line; fill one concrete status value")
+        return None
+
     normalized = line.strip("（）() ")
     if normalized in VALID_STATUSES:
         return normalized
 
-    for status in VALID_STATUSES:
+    for status in sorted(VALID_STATUSES, key=len, reverse=True):
         if status in line:
             return status
 
@@ -167,11 +172,11 @@ def extract_current_status(root: Path, report: Report) -> str | None:
     return None
 
 
-def parse_markdown_table(path: Path, expected_min_cols: int, report: Report) -> list[list[str]]:
+def parse_markdown_table(path: Path, expected_min_cols: int, report: Report) -> List[List[str]]:
     if not path.exists():
         return []
 
-    rows = []
+    rows: List[List[str]] = []
     for raw_line in read_text(path).splitlines():
         line = raw_line.strip()
         if not line.startswith("|") or not line.endswith("|"):
@@ -188,7 +193,7 @@ def parse_markdown_table(path: Path, expected_min_cols: int, report: Report) -> 
     return rows
 
 
-def check_status_tables(root: Path, state: dict, report: Report) -> None:
+def check_status_tables(root: Path, state: Dict, report: Report) -> None:
     progress_rows = parse_markdown_table(root / "PROGRESS.md", 8, report)
     course_rows = parse_markdown_table(root / "COURSE-LIST.md", 7, report)
 
@@ -230,7 +235,7 @@ def check_status_tables(root: Path, state: dict, report: Report) -> None:
             )
 
 
-def check_current_state(root: Path, state: dict, report: Report) -> None:
+def check_current_state(root: Path, state: Dict, report: Report) -> None:
     current_status = extract_current_status(root, report)
     state_status = state.get("current_status")
     if current_status and state_status and current_status != state_status:
@@ -240,7 +245,7 @@ def check_current_state(root: Path, state: dict, report: Report) -> None:
         report.warn(f"current_status is {state_status}; do not move to the next main lesson before resolving it")
 
 
-def check_handoffs(root: Path, state: dict, report: Report) -> None:
+def check_handoffs(root: Path, state: Dict, report: Report) -> None:
     handoffs_dir = root / "handoffs"
     if not handoffs_dir.exists():
         return
