@@ -40,13 +40,46 @@ study/
 ├── learning-records/         学习记录（仅理解检查通过后写入）
 ├── exercises/                练习产出
 └── _templates/               工作区内置模板，方便跨 Agent 续接
+    ├── lesson.md.template
+    ├── handoff.md.template
+    ├── learning-record.md.template
+    ├── review-quiz.md.template
+    └── lesson-types/
+        ├── concept-primer.md.template
+        ├── code-trace.md.template
+        ├── architecture-walkthrough.md.template
+        ├── paper-reading.md.template
+        ├── exercise-review.md.template
+        ├── implementation-lab.md.template
+        └── phase-review.md.template
 ```
+
+## 课型选择
+
+新建课程前，先判断课型，再选模板：
+
+| 课型 | 模板 |
+|---|---|
+| 概念入门课 | `_templates/lesson-types/concept-primer.md.template` |
+| 源码调用链课 | `_templates/lesson-types/code-trace.md.template` |
+| 架构拆解课 | `_templates/lesson-types/architecture-walkthrough.md.template` |
+| 论文阅读课 | `_templates/lesson-types/paper-reading.md.template` |
+| 练习/错题复盘课 | `_templates/lesson-types/exercise-review.md.template` |
+| 动手实现课 | `_templates/lesson-types/implementation-lab.md.template` |
+| 阶段复盘课 | `_templates/lesson-types/phase-review.md.template` |
+| 通用课 | `_templates/lesson.md.template` |
 
 ## 状态取值
 
 `STATE.json`、`CURRENT.md`、`PROGRESS.md`、`COURSE-LIST.md`、`handoffs/` 中统一使用以下状态：
 
 未开始 / 进行中 / 待理解检查 / 待补课 / 补课中 / 已完成 / 需复习 / 暂停
+
+## 理解检查 Rubric
+
+最低通过线默认为 **Understanding**。只有达到 Understanding 及以上，才允许状态改为“已完成”、写入 `learning-records/` 和 `GLOSSARY.md`、进入下一课。
+
+掌握等级：Exposure / Understanding / Skill / Capability。
 
 ## 每节课结束要更新什么
 
@@ -64,6 +97,6 @@ study/
 python "${CLAUDE_SKILL_DIR}/scripts/validate_workspace.py" --root ./study
 ```
 
-校验脚本只读不写，用于检查必需文件、状态枚举、`STATE.json`、`PROGRESS.md` / `COURSE-LIST.md` 一致性，以及 handoff 命名。
+校验脚本只读不写，用于检查必需文件、状态枚举、`STATE.json`、`PROGRESS.md` / `COURSE-LIST.md` 一致性，以及 handoff 命名和工作区模板是否齐全。
 
 创建时间：{{DATE}}
