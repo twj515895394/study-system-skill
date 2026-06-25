@@ -1,6 +1,6 @@
 ---
 name: study-system
-description: "Use this skill whenever the user wants to systematically learn a complete body of material over time — a codebase/source repo, a course or textbook, an exam syllabus, an industry knowledge domain, a company SOP/process doc, a research paper set, or a child's school curriculum — and wants this to be a long-running, cross-session learning process rather than a single one-off explanation. Trigger on phrases like '系统学习', '帮我规划怎么学', '建一个学习计划/学习体系', '我要读懂这个项目/课程/资料', '陪我长期学X', '帮孩子补课/同步进度', '备考规划', or any request implying recurring study sessions on the same material across multiple conversations. Also trigger when the user has already started such a workspace (a `study/` folder with files like MASTER-PLAN.md, CURRENT.md, PROGRESS.md, handoffs/) and wants to continue, review progress, or start the next lesson. Do NOT trigger for a single quick question that doesn't need an ongoing plan."
+description: "Use this skill whenever the user wants to systematically learn a complete body of material over time — a codebase/source repo, a course or textbook, an exam syllabus, an industry knowledge domain, a company SOP/process doc, a research paper set, or a child's school curriculum — and wants this to be a long-running, cross-session learning process rather than a single one-off explanation. Trigger on phrases like '系统学习', '帮我规划怎么学', '建一个学习计划/学习体系', '我要读懂这个项目/课程/资料', '陪我长期学X', '帮孩子补课/同步进度', '备考规划', or any request implying recurring study sessions on the same material across multiple conversations. Also trigger when the user has already started such a workspace (a `study/` folder with files like STATE.json, MASTER-PLAN.md, CURRENT.md, PROGRESS.md, handoffs/) and wants to continue, review progress, or start the next lesson. Do NOT trigger for a single quick question that doesn't need an ongoing plan."
 ---
 
 # 通用学习体系 (Study System)
@@ -21,7 +21,9 @@ description: "Use this skill whenever the user wants to systematically learn a c
 2. **主线固定，补课动态。** 允许插入补基础课、概念复习、源码小课、设计练习等，但补课必须服务主线、不无限扩展，并在结束后回到主线。
 3. **按掌握程度推进，不按天数推进。** “30天计划”之类的节奏只是参考，真正决定能否进入下一课的是理解检查是否通过。
 4. **讲过 ≠ 学会了。** exposure（讲过）、understanding（答对）、skill（能迁移）、capability（能设计）是递进层级。只有用户真正展示出 understanding 或更高，才允许把内容写进 `learning-records/` 或 `GLOSSARY.md`。
-5. **状态必须一致。** `CURRENT.md`、`PROGRESS.md`、`COURSE-LIST.md`、最新 handoff 必须使用 `references/status-model.md` 中的统一状态，不要让多个文件互相矛盾。
+5. **状态必须一致。** `STATE.json`、`CURRENT.md`、`PROGRESS.md`、`COURSE-LIST.md`、最新 handoff 必须使用 `references/status-model.md` 中的统一状态，不要让多个文件互相矛盾。
+6. **问题不等于补课。** 不阻塞当前主线的问题先进入 `QUESTION-PARKING-LOT.md`，不要让每个旁支问题都打断课程。
+7. **通过不等于长期掌握。** 通过理解检查后，把关键知识点加入 `REVIEW-SCHEDULE.md`，后续用主动回忆和迁移题复习。
 
 ## 标准工作流
 
@@ -48,6 +50,8 @@ python "${CLAUDE_SKILL_DIR}/scripts/init_workspace.py" \
   --domain <领域>
 ```
 
+初始化后会生成 `STATE.json`、核心 Markdown 看板、`QUESTION-PARKING-LOT.md`、`REVIEW-SCHEDULE.md`，并把课程/交接/学习记录模板复制到 `study/_templates/`，方便跨 Agent 续接。
+
 `--domain` 决定资料地图文件名。`code/course/industry/exam/child` 是5个常见预设（源码项目用 `SOURCE-READING-MAP.md`，专业课用 `TEXTBOOK-READING-MAP.md`，行业学习用 `RESOURCE-READING-MAP.md`，备考用 `EXAM-ROADMAP.md`，孩子课程用 `SCHOOL-SYNC-PLAN.md`），但不是穷举。传其他字符串（比如 `research`）也不会报错，会落到通用命名，也可以加 `--reading-map-name` / `--reading-map-title` 完全自定义。
 
 脚本只生成骨架和占位内容，具体内容仍需要结合 Step 1/2 的信息填进去。
@@ -60,6 +64,7 @@ python "${CLAUDE_SKILL_DIR}/scripts/init_workspace.py" \
 - `MASTER-PLAN.md` —— 唯一权威主计划：总目标、阶段路线、课程清单、阶段验收、动态补课规则、节奏
 - `TEACHING-PROTOCOL.md` —— 教学风格协议（在第一节课结束前，必须与用户明确偏好并初始化，规定风格、概念极限、图表及理解检查偏好）
 - `COURSE-ROADMAP.md` / `COURSE-LIST.md` —— MASTER-PLAN 的展开视图
+- `STATE.json` —— 机器可读状态摘要，至少同步 topic、domain、current_status、reading_map
 - 资料地图（文件名按 domain 而定）—— 按学习主线给资料排序，不是从头到尾机械列目录
 
 如果用户的目标是“先系统学懂一个领域/项目，再落地一个具体产出”，把“学懂”和“能落地”拆成不同阶段，分开验收。
@@ -68,25 +73,39 @@ python "${CLAUDE_SKILL_DIR}/scripts/init_workspace.py" \
 
 ### Step 5：单课循环
 
-每节课只讲一个相对紧凑的主题。节奏和高概念密度课程的特殊处理见 `references/lesson-flow.md`，模板见 `templates/lesson.md.template`。
+每节课只讲一个相对紧凑的主题。节奏和高概念密度课程的特殊处理见 `references/lesson-flow.md`，模板见 `templates/lesson.md.template`，工作区内副本见 `study/_templates/lesson.md.template`。
 
 一课的最简骨架：目标 → 总览图 → 核心概念 → 资料/源码锚点 → 类比 → 小练习 → **理解检查** → 视情况收尾或继续。
 
 理解检查不能只问“懂了吗”，要让用户用自己的话解释、做对照表、画流程、判断边界、设计小方案、回答场景题等。只有理解检查通过才进入收尾。
 
+如果出现有价值但不阻塞当前主线的问题，写入 `QUESTION-PARKING-LOT.md`，并说明后续处理策略；不要因为每个旁支问题都插补课。
+
 ### Step 6：课程收尾
 
-通过理解检查后才执行收尾动作：更新 `PROGRESS.md`、更新 `CURRENT.md`、写一份 `handoffs/`、更新对应的 `reference/`，必要时写 `learning-records/`、`GLOSSARY.md`、`NOTES.md`。若风格偏好改变，同步更新 `TEACHING-PROTOCOL.md`。
+通过理解检查后才执行收尾动作：更新 `STATE.json`、`PROGRESS.md`、`CURRENT.md`、写一份 `handoffs/`、更新对应的 `reference/`，必要时写 `learning-records/`、`GLOSSARY.md`、`NOTES.md`。若风格偏好改变，同步更新 `TEACHING-PROTOCOL.md`。
+
+只有状态为 `已完成` 时，才允许写入 `learning-records/`、`GLOSSARY.md`，并把关键知识点加入 `REVIEW-SCHEDULE.md`。
 
 如果理解检查没通过，不要假装收尾。按 `references/dynamic-makeup-rules.md` 判断是否需要插入补课，补课结束后回到本课继续，而不是直接跳到下一课。
 
 ### Step 7：跨会话续接
 
-新会话进入已有学习项目时，按 `references/handoff-protocol.md` 的顺序读取文件：README → MASTER-PLAN → MISSION → TEACHING-PROTOCOL → CURRENT → PROGRESS → 最新 handoff。不要每次都从头问用户“我们学到哪了”。
+新会话进入已有学习项目时，按 `references/handoff-protocol.md` 的顺序读取文件：README → STATE.json → MASTER-PLAN → MISSION → TEACHING-PROTOCOL → CURRENT → PROGRESS → 最新 handoff。不要每次都从头问用户“我们学到哪了”。
+
+### Step 8：状态校验
+
+在阶段收尾、新会话接手、或发现状态不一致时，运行：
+
+```bash
+python "${CLAUDE_SKILL_DIR}/scripts/validate_workspace.py" --root ./study
+```
+
+校验脚本只读不写。若出现 error，先修复状态和文件一致性，再继续授课。
 
 ## 统一状态模型
 
-`CURRENT.md`、`PROGRESS.md`、`COURSE-LIST.md`、最新 handoff 必须统一使用以下状态：
+`STATE.json`、`CURRENT.md`、`PROGRESS.md`、`COURSE-LIST.md`、最新 handoff 必须统一使用以下状态：
 
 未开始 / 进行中 / 待理解检查 / 待补课 / 补课中 / 已完成 / 需复习 / 暂停
 
@@ -110,9 +129,10 @@ python "${CLAUDE_SKILL_DIR}/scripts/init_workspace.py" \
 | `references/lesson-flow.md` | Step 5，设计单课结构、处理高概念密度内容 |
 | `references/dynamic-makeup-rules.md` | 发现理解断层、需要判断是否插补课时 |
 | `references/handoff-protocol.md` | Step 7，新会话续接、写 handoff 时 |
-| `references/status-model.md` | 任何涉及 CURRENT / PROGRESS / COURSE-LIST / handoff 状态更新时 |
+| `references/status-model.md` | 任何涉及 STATE / CURRENT / PROGRESS / COURSE-LIST / handoff 状态更新时 |
 | `templates/*.md.template` | 填充工作区各文件内容时的字段参考 |
 | `scripts/init_workspace.py` | Step 3，一次性生成 study/ 骨架 |
+| `scripts/validate_workspace.py` | Step 8，校验 study/ 工作区一致性 |
 
 ## 学习成果的检验标准
 
