@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "topic": "MiniAgentFlow 源码学习",
+  "domain": "code",
+  "reading_map": "SOURCE-READING-MAP.md",
+  "diagnosis_mode": "完整诊断",
+  "current_lesson_id": "L01",
+  "current_lesson_title": "系统总览与核心目录",
+  "current_phase": "Phase 1 - 项目地图与主链路",
+  "current_status": "已完成",
+  "latest_handoff": "handoffs/2026-06-25-L01-system-overview.md",
+  "blocked_by": [],
+  "makeup_count_in_current_phase": 0,
+  "last_updated": "2026-06-25"
+}
