@@ -64,19 +64,29 @@ python "${CLAUDE_SKILL_DIR}/scripts/init_workspace.py" \
 3. `COURSE-ROADMAP.md` / `COURSE-LIST.md`：主计划的展开视图。
 4. 资料地图：按学习顺序排资料或源码，而不是机械列目录。
 
-## 5. 上第一课
+## 5. 创建第一课
 
-每节课前先选课型：
+每节课前先选课型。现在建议用脚本创建课程文件：
 
-| 课型 | 模板 |
+```bash
+python "${CLAUDE_SKILL_DIR}/scripts/new_lesson.py" \
+  --root ./study \
+  --lesson-id L01 \
+  --title "系统总览与核心目录" \
+  --lesson-type architecture-walkthrough
+```
+
+常见课型：
+
+| 课型 | lesson-type |
 |---|---|
-| 概念入门课 | `study/_templates/lesson-types/concept-primer.md.template` |
-| 源码调用链课 | `study/_templates/lesson-types/code-trace.md.template` |
-| 架构拆解课 | `study/_templates/lesson-types/architecture-walkthrough.md.template` |
-| 论文阅读课 | `study/_templates/lesson-types/paper-reading.md.template` |
-| 练习复盘课 | `study/_templates/lesson-types/exercise-review.md.template` |
-| 动手实现课 | `study/_templates/lesson-types/implementation-lab.md.template` |
-| 阶段复盘课 | `study/_templates/lesson-types/phase-review.md.template` |
+| 概念入门课 | `concept-primer` |
+| 源码调用链课 | `code-trace` |
+| 架构拆解课 | `architecture-walkthrough` |
+| 论文阅读课 | `paper-reading` |
+| 练习复盘课 | `exercise-review` |
+| 动手实现课 | `implementation-lab` |
+| 阶段复盘课 | `phase-review` |
 
 ## 6. 做理解检查
 
@@ -94,25 +104,32 @@ python "${CLAUDE_SKILL_DIR}/scripts/init_workspace.py" \
 
 ## 7. 收尾并校验
 
-每节课结束至少更新：
-
-- `STATE.json`
-- `CURRENT.md`
-- `PROGRESS.md`
-- `handoffs/`
-- `reference/`
-
-只有理解检查通过，才更新：
-
-- `learning-records/`
-- `GLOSSARY.md`
-- `REVIEW-SCHEDULE.md`
-
-然后运行：
+理解检查通过后，建议按这个顺序执行：
 
 ```bash
+python "${CLAUDE_SKILL_DIR}/scripts/add_handoff.py" \
+  --root ./study \
+  --lesson-id L01 \
+  --title "系统总览与核心目录" \
+  --status 已完成
+
+python "${CLAUDE_SKILL_DIR}/scripts/add_learning_record.py" \
+  --root ./study \
+  --topic "系统总览与核心目录" \
+  --lesson-id L01 \
+  --mastery Understanding \
+  --evidence "用户能复述核心模块职责和主链路"
+
+python "${CLAUDE_SKILL_DIR}/scripts/close_lesson.py" \
+  --root ./study \
+  --lesson-id L01 \
+  --title "系统总览与核心目录" \
+  --status 已完成
+
 python "${CLAUDE_SKILL_DIR}/scripts/validate_workspace.py" --root ./study
 ```
+
+脚本命令完整说明见：`docs/script-commands.md`。
 
 ## 8. 看完整示例
 
