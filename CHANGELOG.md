@@ -4,6 +4,17 @@
 
 ### Added
 
+- Added `scripts/study_utils.py` shared helpers.
+- Added `scripts/new_lesson.py` for creating lesson files from lesson type templates.
+- Added `scripts/add_handoff.py` for generating standard handoff files.
+- Added `scripts/add_learning_record.py` for creating learning records and updating review schedules.
+- Added `scripts/close_lesson.py` for syncing lesson closeout state across `STATE.json`, `CURRENT.md`, `PROGRESS.md`, and `COURSE-LIST.md`.
+- Added `docs/script-commands.md`.
+
+## 0.4.0 - P3 Examples and Onboarding
+
+### Added
+
 - Added `examples/codebase-study-demo/` as a complete codebase learning workspace demo.
 - Added `docs/quickstart.md`.
 - Added `ROADMAP.md`.
