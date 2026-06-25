@@ -60,6 +60,7 @@ python scripts/init_workspace.py --root ./study --topic "<学习主题>" --domai
 - `MASTER-PLAN.md` —— 唯一权威主计划：总目标、阶段路线、课程清单、阶段验收、动态补课规则、节奏
 
   如果用户的目标是"先系统学懂一个领域/项目，再落地一个具体产出"（比如学RAG领域知识、最终要做一个检索系统；学一个框架、最终要写个项目），把这两件事拆成独立的阶段分开验收，不要混在一起算一个目标——"学懂了"和"能落地"是两个不同的验收标准，混在一起容易导致前面学了一堆但说不清是否真的够用来做后面的事。
+- `TEACHING-PROTOCOL.md` —— 教学风格协议（在第一节课结束前，必须与用户明确偏好并初始化，规定风格、概念极限、图表及理解检查偏好）
 - `COURSE-ROADMAP.md` / `COURSE-LIST.md` —— MASTER-PLAN 的展开视图
 - 资料地图（文件名按 domain 而定）—— 按学习主线给资料排序，不是从头到尾机械列目录
 
@@ -75,13 +76,13 @@ python scripts/init_workspace.py --root ./study --topic "<学习主题>" --domai
 
 ### Step 6：课程收尾
 
-通过理解检查后才执行收尾动作：更新 `PROGRESS.md`、更新 `CURRENT.md`、写一份 `handoffs/`、更新对应的 `reference/`，必要时写 `learning-records/` 和 `GLOSSARY.md`、`NOTES.md`。
+通过理解检查后才执行收尾动作：更新 `PROGRESS.md`、更新 `CURRENT.md`、写一份 `handoffs/`、更新对应的 `reference/`，必要时写 `learning-records/`、`GLOSSARY.md`、`NOTES.md`，若风格偏好改变，同步更新 `TEACHING-PROTOCOL.md`。
 
 如果理解检查没通过，不要假装收尾——按 `references/dynamic-makeup-rules.md` 判断是否需要插入补课，补课结束后回到本课继续，而不是直接跳到下一课。
 
 ### Step 7：跨会话续接
 
-新会话进入这个学习项目时，按 `references/handoff-protocol.md` 的顺序读取文件（README → MASTER-PLAN → MISSION → CURRENT → PROGRESS → 最新 handoff），不要每次都从头问用户"我们学到哪了"。
+新会话进入这个学习项目时，按 `references/handoff-protocol.md` 的顺序读取文件（README → MASTER-PLAN → MISSION → TEACHING-PROTOCOL → CURRENT → PROGRESS → 最新 handoff），不要每次都从头问用户"我们学到哪了"。
 
 ## 动态补课判定
 

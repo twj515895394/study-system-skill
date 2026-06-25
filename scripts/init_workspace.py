@@ -42,6 +42,7 @@ FILE_MAP = [
     ("PROGRESS.md", "PROGRESS.md.template"),
     ("COURSE-ROADMAP.md", "COURSE-ROADMAP.md.template"),
     ("COURSE-LIST.md", "COURSE-LIST.md.template"),
+    ("TEACHING-PROTOCOL.md", "TEACHING-PROTOCOL.md.template"),
     ("GLOSSARY.md", "GLOSSARY.md.template"),
     ("NOTES.md", "NOTES.md.template"),
 ]

@@ -7,12 +7,13 @@
 1. `README.md` —— 这个工作区是什么、目录结构
 2. `MASTER-PLAN.md` —— 唯一权威主计划，所有其他文件的依据
 3. `MISSION.md` —— 为什么学，避免推进方向跑偏
-4. `CURRENT.md` —— 当前学习状态，最关键的一份
-5. `PROGRESS.md` —— 所有课程的整体进度看板
-6. 最新一份 `handoffs/` —— 上节课具体发生了什么
-7. 必要时读 `reference/`、`learning-records/`、`NOTES.md`（比如要确认某个概念之前是否真的讲过、用户有什么教学偏好）
+4. `TEACHING-PROTOCOL.md` —— 教学风格与偏好协议，确保不同会话间上课节奏、讲解风格和偏好高度一致
+5. `CURRENT.md` —— 当前学习状态，最关键的一份
+6. `PROGRESS.md` —— 所有课程的整体进度看板
+7. 最新一份 `handoffs/` —— 上节课具体发生了什么
+8. 必要时读 `reference/`、`learning-records/`、`NOTES.md`（比如要确认某个概念之前是否真的讲过、记录新的临时想法）
 
-不需要每份都通读全文，`CURRENT.md` 和最新 handoff 通常已经够接上当前上下文；`MASTER-PLAN.md` 和 `MISSION.md` 主要用来校验"接下来要做的事和主线方向是否一致"。
+不需要每份都通读全文，`CURRENT.md`、`TEACHING-PROTOCOL.md` 和最新 handoff 通常已经够接上当前上下文；`MASTER-PLAN.md` 和 `MISSION.md` 主要用来校验"接下来要做的事和主线方向是否一致"。
 
 ## 每节课结束必须更新
 
@@ -21,6 +22,10 @@
 - 一份新的 `handoffs/`
 - 对应的 `reference/`（课程精华压缩版，不是课堂讲义）
 
+## 第一节课结束后或风格偏好变动时更新
+
+- `TEACHING-PROTOCOL.md`（第一节课结束后，必须与用户对齐并初始化该协议；后续上课若发现节奏/偏好有变，须同步更新）
+
 ## 只有通过理解检查后才更新
 
 - `learning-records/`（记录用户已经掌握了什么、证据是什么、解锁了后续什么内容）
@@ -28,7 +33,7 @@
 
 ## 用户偏好变化时更新
 
-- `NOTES.md`（比如发现用户喜欢表格、不喜欢泛泛而谈、概念密度高时要放慢、希望结合某种类比等）
+- `NOTES.md`（作为临时笔记和备忘，成熟的偏好应整理进 `TEACHING-PROTOCOL.md`）
 
 ## handoff 应该写什么
 
