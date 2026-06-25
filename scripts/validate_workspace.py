@@ -59,6 +59,14 @@ REQUIRED_WORKSPACE_TEMPLATES = [
     "lesson.md.template",
     "handoff.md.template",
     "learning-record.md.template",
+    "review-quiz.md.template",
+    "lesson-types/concept-primer.md.template",
+    "lesson-types/code-trace.md.template",
+    "lesson-types/architecture-walkthrough.md.template",
+    "lesson-types/paper-reading.md.template",
+    "lesson-types/exercise-review.md.template",
+    "lesson-types/implementation-lab.md.template",
+    "lesson-types/phase-review.md.template",
 ]
 
 HANDOFF_NAME_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}-L\d{2,}-.+\.md$")
